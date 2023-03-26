@@ -16,15 +16,17 @@ public class RelativeMovement : MonoBehaviour
     public float terminalVelocity = -10.0f;
     public float minFall = -1.5f;
 
+    private float verSpeed;
     private ControllerColliderHit contact;
     private CharacterController charController;
-    private float verSpeed;
+    private Animator anim;
 
     // Start is called before the first frame update
     void Start()
     {
         verSpeed = minFall;
         charController = GetComponent<CharacterController>();
+        anim = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -55,18 +57,26 @@ public class RelativeMovement : MonoBehaviour
             hitGround = hit.distance <= check;
         }
 
+        anim.SetFloat("Speed", movement.sqrMagnitude);
+
         if (hitGround)
         {
             if (Input.GetButtonDown("Jump"))
                 verSpeed = jumpSpeed;
             else
+            {
                 verSpeed = minFall;
+                anim.SetBool("Jumping", false);
+            }
         }
         else
         {
             verSpeed += gravity * 5 * Time.deltaTime;
             if (verSpeed < terminalVelocity)
                 verSpeed = terminalVelocity;
+
+            if (contact != null)
+                anim.SetBool("Jumping", true);
 
             // Raycast didn't detect the ground, but the capsule is touching the ground
             if (charController.isGrounded)
